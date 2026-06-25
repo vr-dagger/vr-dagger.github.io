@@ -1,0 +1,7 @@
+# Raw supplementary video exceeds GitHub's 100 MB per-file limit — keep local only.
+raw_mat/snippets.mp4
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp

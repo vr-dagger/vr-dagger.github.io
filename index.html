@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VR-DAgger: Immersive VR for Dexterous Data Collection and Uncertainty-Guided On-Policy Correction</title>
+<meta name="description" content="VR-DAgger is a human-in-the-loop framework that combines immersive VR teleoperation with MC-dropout uncertainty-guided active relabeling for dexterous robot manipulation. IROS 2026." />
+
+<!-- Open Graph / social -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="VR-DAgger: Immersive VR for Dexterous Data Collection and Uncertainty-Guided On-Policy Correction" />
+<meta property="og:description" content="Immersive VR teleoperation + uncertainty-guided active relabeling for dexterous manipulation. Up to +22 pp over behavioral cloning, ~40% less collection time. IROS 2026." />
+<meta property="og:image" content="assets/img/og.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
+<link rel="alternate icon" type="image/png" href="assets/img/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<!-- ============================ NAV ============================ -->
+<nav class="topnav">
+  <div class="wrap">
+    <a class="brand" href="#top">VR&#8209;DAgger<span></span></a>
+    <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
+    <div class="navlinks">
+      <a class="navlink" href="#overview">Overview</a>
+      <a class="navlink" href="#video">Video</a>
+      <a class="navlink" href="#method">Method</a>
+      <a class="navlink" href="#tasks">Tasks</a>
+      <a class="navlink" href="#relabeling">Active Relabeling</a>
+      <a class="navlink" href="#results">Results</a>
+      <a class="navlink" href="#bibtex">BibTeX</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================ HERO ============================ -->
+<header id="top" class="hero">
+  <div class="wrap">
+    <span class="badge">IROS 2026</span>
+    <h1><span class="tt">VR&#8209;DAgger</span>: Immersive VR for Dexterous Data Collection and Uncertainty&#8209;Guided On&#8209;Policy Correction</h1>
+
+    <p class="authors">
+      René Zurbrügg<sup>*</sup>, &nbsp;Tifanny Portela<sup>*</sup>, &nbsp;Arjun Bhardwaj,
+      &nbsp;Aravind Elanjimattathil Vijayan, &nbsp;Maximilian Wilder&#8209;Smith, &nbsp;Marco Hutter
+    </p>
+    <p class="affil">Robotics Systems Lab, ETH Zürich</p>
+    <p class="note-eq"><sup>*</sup>Equal contribution</p>
+
+    <div class="btn-row">
+      <a class="btn primary" href="#" data-placeholder="arxiv" aria-label="arXiv paper (link coming soon)">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M6 2h9l5 5v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm8 1.5V8h4.5L14 3.5zM8 13h8v1.5H8V13zm0 3h8v1.5H8V16zm0-6h5v1.5H8V10z"/></svg>
+        Paper / arXiv
+      </a>
+      <a class="btn ghost" href="#" data-placeholder="code" aria-label="Code repository (link coming soon)">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+        Code
+      </a>
+      <a class="btn ghost" href="#video">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
+        Video
+      </a>
+    </div>
+    <p class="btn-hint">arXiv &amp; code links coming soon.</p>
+
+    <figure class="hero-figure">
+      <img src="assets/img/teaser.png" alt="VR-DAgger overview: a task-agnostic VR application integrates with any Isaac Lab scene for immersive dexterous teleoperation; the policy rolls out autonomously and MC-dropout uncertainty selects informative failure snippets for the operator to correct." />
+      <figcaption><b>VR-DAgger: portable, uncertainty-guided VR data collection.</b> A task-agnostic VR
+        application integrates directly with any Isaac Lab scene, providing immersive dexterous
+        teleoperation. The policy rolls out autonomously; MC-dropout uncertainty selects the most
+        informative failure segments as short snippets for the operator to review and correct in VR,
+        without full-rollout monitoring.</figcaption>
+    </figure>
+  </div>
+</header>
+
+<!-- ============================ OVERVIEW / ABSTRACT ============================ -->
+<section id="overview" class="section abstract">
+  <div class="wrap">
+    <p class="eyebrow">Abstract</p>
+    <h2 class="section-title">Concentrate human effort where the policy is least certain</h2>
+    <p>Learning from demonstrations is effective for robotic manipulation, but collecting sufficient
+      task-specific data remains a major bottleneck. Under distribution shift, small errors compound,
+      performance degrades, and expert time is often spent on redundant, low-value corrections instead
+      of the few critical failure cases.</p>
+    <p>We present <b>VR-DAgger</b>, a human-in-the-loop framework centered on an immersive VR
+      application for dexterous teleoperation, demonstration collection, and selective policy
+      correction. The VR client provides intuitive hand control with synchronized scene visualization,
+      while a backend workstation runs simulation and learning, enabling autonomous rollouts without
+      continuous operator oversight. We use Monte Carlo (MC) dropout to score uncertainty during
+      Isaac Lab rollouts of a diffusion policy and select informative failure segments for correction.
+      These segments are replayed in VR as clips, where the operator selectively labels and corrects the
+      policy's behavior, concentrating supervision where uncertainty is highest &mdash; without
+      full-rollout monitoring or a separate intervention classifier.</p>
+    <p>We evaluate on three dexterous manipulation tasks (Pan pick-and-place, Drawer opening, Valve
+      turning) with a 10-DoF XHand under standard and challenging initial configurations. Active labeling
+      consistently improves over behavioral cloning across all tasks, with gains of up to
+      <b>22 percentage points</b>. Compared to unguided human-in-the-loop inspection, VR-DAgger reduces
+      per-sample collection time by approximately <b>40%</b> by focusing review on selected segments
+      rather than full rollouts.</p>
+
+    <div class="media-row cols-2" style="margin-top:30px;">
+      <figure class="figure-card">
+        <video class="clip" src="assets/video/clip_teleop.mp4" muted loop playsinline preload="metadata" data-lazy poster="assets/img/poster.jpg"></video>
+        <p class="clip-cap">Immersive VR teleoperation: tracked hand motion drives the simulated robot.</p>
+      </figure>
+      <figure class="figure-card">
+        <video class="clip" src="assets/video/clip_pan.mp4" muted loop playsinline preload="metadata" data-lazy></video>
+        <p class="clip-cap">Dexterous grasping of the pan with the 10-DoF XHand in Isaac Lab.</p>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ VIDEO ============================ -->
+<section id="video" class="section">
+  <div class="wrap">
+    <p class="eyebrow">Supplementary Video</p>
+    <h2 class="section-title">System &amp; data-collection walkthrough</h2>
+    <p class="section-lead">A full walkthrough of the VR-DAgger pipeline: VR teleoperation and robot
+      control, haptic feedback, behavioral-cloning data collection, human-in-the-loop inspection, and
+      uncertainty-guided corrective data collection.</p>
+    <figure class="figure-card">
+      <video controls preload="metadata" poster="assets/img/poster.jpg" style="width:100%; border-radius:8px;">
+        <source src="assets/video/supp.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================ METHOD ============================ -->
+<section id="method" class="section">
+  <div class="wrap">
+    <p class="eyebrow">Method</p>
+    <h2 class="section-title">A client–server VR loop that decouples execution from human attention</h2>
+    <p class="section-lead">VR-DAgger follows an iterative loop: a visuomotor diffusion policy is trained
+      on collected demonstrations, rolled out in simulation, and on failure the most uncertain segments
+      are surfaced to a supervisor for correction. Corrective demonstrations are aggregated and training
+      continues.</p>
+
+    <figure class="figure-card">
+      <img src="assets/img/overview.png" alt="VR-DAgger system overview: a client-server architecture decouples interactive VR teleoperation from simulation and learning." />
+      <figcaption><b>VR-DAgger system overview.</b> A client–server architecture decouples interactive
+        VR teleoperation from simulation and learning. The server runs Isaac Lab, policy inference, and
+        MC-dropout uncertainty estimation; the Meta Quest client streams hand and head tracking for
+        retargeting and visualizes the live scene state. After each failed rollout, the
+        highest-uncertainty segment is extracted and presented as a short snippet for the operator to
+        review and correct via VR teleoperation.</figcaption>
+    </figure>
+
+    <div class="steps">
+      <div class="step">
+        <div class="k">1</div>
+        <h3>Standalone OpenXR client</h3>
+        <p>A native Unity/OpenXR app on a Meta Quest renders any USD scene locally and syncs it via
+          lightweight object and robot poses — no stereo streaming, so the headset refresh rate is
+          decoupled from server and network speed. Works with any Isaac Lab rigid-body scene.</p>
+      </div>
+      <div class="step">
+        <div class="k">2</div>
+        <h3>GPU motion retargeting</h3>
+        <p>Tracked human keypoints are mapped to the robot hand by jointly optimizing joint positions
+          and a global <i>SE(3)</i> wrist pose with anchor keypoints, solved in real time on GPU with
+          NVIDIA Warp. Supports dexterous hands through parallel-jaw grippers.</p>
+      </div>
+      <div class="step">
+        <div class="k">3</div>
+        <h3>Uncertainty-guided correction</h3>
+        <p>MC-dropout scores per-timestep policy uncertainty during autonomous rollouts. The most
+          uncertain failure snippets are replayed in VR for targeted correction — no full-rollout
+          monitoring and no separately trained intervention classifier.</p>
+      </div>
+    </div>
+
+    <div class="media-row cols-2" style="margin-top:26px;">
+      <figure class="figure-card">
+        <img src="assets/img/retargeting.png" alt="Real-time GPU-based retargeting pipeline mapping human keypoints and key vectors to their robot counterparts." />
+        <figcaption><b>Real-time GPU retargeting.</b> Human keypoints and task-space key vectors are
+          mapped to their robot counterparts via forward kinematics; joint targets are obtained by
+          solving a weighted least-squares objective with joint-limit constraints.</figcaption>
+      </figure>
+      <figure class="figure-card">
+        <video class="clip" src="assets/video/clip_ui.mp4" muted loop playsinline preload="metadata" data-lazy style="aspect-ratio:16/9; object-fit:cover;"></video>
+        <p class="clip-cap">In-headset VR client: synchronized scene state and on-the-fly scene control.</p>
+        <img src="assets/img/hands.png" alt="Supported end-effectors: a variety of gripper morphologies from dexterous multi-finger hands to parallel-jaw grippers." style="margin-top:12px; border-radius:8px;" />
+        <figcaption><b>Supported end-effectors.</b> The teleoperation app and retargeting pipeline
+          support a variety of gripper morphologies, enabling data collection across robot
+          configurations.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TASKS ============================ -->
+<section id="tasks" class="section">
+  <div class="wrap">
+    <p class="eyebrow">Evaluation Environments</p>
+    <h2 class="section-title">Three dexterous manipulation tasks</h2>
+    <p class="section-lead">All tasks use the 10-DoF XHand and are evaluated under two difficulty levels:
+      <b>Default</b> (standard initial configurations) and <b>Hard</b> (greater variation in object
+      placement and initial hand pose). Crucially, all corrective data is collected only under Default —
+      Hard results measure generalization beyond the demonstrated distribution.</p>
+
+    <figure class="figure-card">
+      <img src="assets/img/tasks.png" alt="Overview of the three manipulation tasks: Valve, Drawer, and Pan." />
+      <figcaption><b>Evaluation environments.</b> <i>Valve:</i> rotate a wall-mounted valve (revolute
+        joint). <i>Drawer:</i> pull open a drawer on a multi-drawer cabinet (prismatic joint).
+        <i>Pan:</i> a long-horizon pick-and-place task — grasp a pan and place it on a target burner.</figcaption>
+    </figure>
+
+    <div class="task-grid">
+      <div class="task">
+        <video src="assets/video/clip_pan.mp4" muted loop playsinline preload="metadata" data-lazy></video>
+        <div class="body">
+          <span class="tag">Long-horizon</span>
+          <h3>Pan</h3>
+          <p>Pick-and-place: grasp a pan and place it onto a target burner, requiring precise grasping
+            and object repositioning.</p>
+        </div>
+      </div>
+      <div class="task">
+        <video src="assets/video/clip_drawer.mp4" muted loop playsinline preload="metadata" data-lazy></video>
+        <div class="body">
+          <span class="tag">Prismatic joint</span>
+          <h3>Drawer</h3>
+          <p>Pull open a drawer on a multi-drawer cabinet, involving sustained contact with a prismatic
+            joint.</p>
+        </div>
+      </div>
+      <div class="task">
+        <video src="assets/video/clip_takeover.mp4" muted loop playsinline preload="metadata" data-lazy></video>
+        <div class="body">
+          <span class="tag">Human takeover</span>
+          <h3>Correction in VR</h3>
+          <p>A green/red overlay flags hand–robot misalignment; the operator takes over from a
+            mid-episode state to provide a corrective demonstration.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ ACTIVE RELABELING ============================ -->
+<section id="relabeling" class="section stats">
+  <div class="wrap">
+    <p class="eyebrow">Uncertainty-Guided Active Relabeling</p>
+    <h2 class="section-title">Surface the few snippets that matter</h2>
+    <p class="section-lead">Standard human-in-the-loop methods require the supervisor to watch full
+      rollouts to decide where to intervene. VR-DAgger replaces this with a principled relabeling step
+      that automatically isolates the most uncertain segment of a failed episode.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="k">①</div>
+        <h3>MC-dropout uncertainty</h3>
+        <p>After each rollout we run <i>N</i>=10 stochastic forward passes through the diffusion policy
+          with dropout enabled, and take the mean predictive variance across action dimensions as a
+          scalar uncertainty trace <i>u<sub>t</sub></i> over the episode.</p>
+      </div>
+      <div class="step">
+        <div class="k">②</div>
+        <h3>Top-3 snippet selection</h3>
+        <p>For failed episodes, we select the three peak-uncertainty timesteps and extract a 2&nbsp;s
+          context window around each, presented as short 2D playback clips inside the VR interface.</p>
+      </div>
+      <div class="step">
+        <div class="k">③</div>
+        <h3>Targeted correction</h3>
+        <p>The supervisor picks the snippet most in need of correction and takes over teleoperation for
+          the remainder of the episode. Corrective segments are appended and the policy is retrained.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <b>Why it works:</b> on-policy collection naturally surfaces states where the current policy
+      diverges from the expert distribution — states underrepresented in offline demonstrations.
+      Teaching the policy to recover in exactly these states closes the loop that behavioral cloning
+      leaves open, and uncertainty selection focuses the human on those states without watching full
+      rollouts.
+    </div>
+  </div>
+</section>
+
+<!-- ============================ RESULTS ============================ -->
+<section id="results" class="section">
+  <div class="wrap">
+    <p class="eyebrow">Results</p>
+    <h2 class="section-title">Active relabeling consistently beats behavioral cloning</h2>
+    <p class="section-lead">Across all tasks, both Corrective (VR-DAgger) and unguided HIL improve over
+      behavioral cloning, with the largest gains on Hard configurations — even though no corrective data
+      is ever collected under Hard difficulty. Corrective approaches the quality of full human oversight
+      while cutting per-sample collection time by ~40%.</p>
+
+    <div class="table-scroll">
+      <table class="results">
+        <thead>
+          <tr>
+            <th rowspan="2">Experiment</th>
+            <th rowspan="2">Init.</th>
+            <th rowspan="2">Corr.</th>
+            <th colspan="2">Pan · Default</th>
+            <th colspan="2">Pan · Hard</th>
+            <th colspan="2">Drawer · Default</th>
+            <th colspan="2">Drawer · Hard</th>
+            <th colspan="2">Valve · Default</th>
+            <th colspan="2">Valve · Hard</th>
+          </tr>
+          <tr>
+            <th>Task</th><th>Subtask</th>
+            <th>Task</th><th>Subtask</th>
+            <th>Task</th><th>Subtask</th>
+            <th>Task</th><th>Subtask</th>
+            <th>Task</th><th>Subtask</th>
+            <th>Task</th><th>Subtask</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>BC</td><td>50</td><td>—</td>
+            <td>49<span class="std"> ±4.1</span></td><td>72<span class="std"> ±4.1</span></td>
+            <td>18<span class="std"> ±0.9</span></td><td>38<span class="std"> ±2.7</span></td>
+            <td>87<span class="std"> ±1.6</span></td><td>92<span class="std"> ±2.3</span></td>
+            <td>53<span class="std"> ±5.9</span></td><td>62<span class="std"> ±4.9</span></td>
+            <td>84<span class="std"> ±2.5</span></td><td>88<span class="std"> ±1.4</span></td>
+            <td>54<span class="std"> ±2.3</span></td><td>59<span class="std"> ±3.1</span></td>
+          </tr>
+          <tr class="group-start">
+            <td>BC</td><td>100</td><td>—</td>
+            <td>40<span class="std"> ±0.9</span></td><td>66<span class="std"> ±4.7</span></td>
+            <td>18<span class="std"> ±3.9</span></td><td>39<span class="std"> ±5.5</span></td>
+            <td>92<span class="std"> ±2.1</span></td><td>95<span class="std"> ±0.5</span></td>
+            <td>71<span class="std"> ±2.3</span></td><td>78<span class="std"> ±3.2</span></td>
+            <td>92<span class="std"> ±0.5</span></td><td>97<span class="std"> ±1.6</span></td>
+            <td>72<span class="std"> ±2.7</span></td><td>81<span class="std"> ±1.6</span></td>
+          </tr>
+          <tr>
+            <td>BC</td><td>150</td><td>—</td>
+            <td>50<span class="std"> ±0.8</span></td><td>70<span class="std"> ±3.4</span></td>
+            <td>30<span class="std"> ±2.0</span></td><td>64<span class="std"> ±4.3</span></td>
+            <td>93<span class="std"> ±3.3</span></td><td>97<span class="std"> ±0.5</span></td>
+            <td>79<span class="std"> ±2.8</span></td><td>84<span class="std"> ±2.8</span></td>
+            <td class="second">98<span class="std"> ±1.6</span></td><td>98<span class="std"> ±2.1</span></td>
+            <td>84<span class="std"> ±4.1</span></td><td>92<span class="std"> ±3.5</span></td>
+          </tr>
+          <tr class="group-start">
+            <td>HIL-Inspection</td><td>50</td><td>50</td>
+            <td>56<span class="std"> ±3.0</span></td><td>86<span class="std"> ±2.1</span></td>
+            <td>26<span class="std"> ±1.6</span></td><td>54<span class="std"> ±1.6</span></td>
+            <td>91<span class="std"> ±3.6</span></td><td>96<span class="std"> ±1.6</span></td>
+            <td>84<span class="std"> ±4.4</span></td><td>89<span class="std"> ±3.3</span></td>
+            <td class="second">98<span class="std"> ±1.6</span></td><td>99<span class="std"> ±0.9</span></td>
+            <td>83<span class="std"> ±2.7</span></td><td>89<span class="std"> ±2.7</span></td>
+          </tr>
+          <tr>
+            <td>HIL-Inspection</td><td>50</td><td>100</td>
+            <td class="second">67<span class="std"> ±5.0</span></td><td class="second">91<span class="std"> ±2.7</span></td>
+            <td class="second">34<span class="std"> ±3.6</span></td><td class="best">68<span class="std"> ±2.1</span></td>
+            <td class="best">97<span class="std"> ±1.6</span></td><td class="second">98<span class="std"> ±2.1</span></td>
+            <td class="best">92<span class="std"> ±1.6</span></td><td class="best">95<span class="std"> ±0.9</span></td>
+            <td class="best">99<span class="std"> ±0.8</span></td><td class="best">100<span class="std"> ±0.0</span></td>
+            <td class="best">98<span class="std"> ±1.4</span></td><td class="best">98<span class="std"> ±0.5</span></td>
+          </tr>
+          <tr class="group-start">
+            <td>Corrective</td><td>50</td><td>50</td>
+            <td>54<span class="std"> ±8.7</span></td><td>76<span class="std"> ±2.3</span></td>
+            <td>22<span class="std"> ±2.5</span></td><td>54<span class="std"> ±0.8</span></td>
+            <td class="best">97<span class="std"> ±1.2</span></td><td class="second">98<span class="std"> ±0.8</span></td>
+            <td class="second">86<span class="std"> ±2.7</span></td><td class="second">92<span class="std"> ±1.2</span></td>
+            <td>97<span class="std"> ±1.8</span></td><td class="best">100<span class="std"> ±0.5</span></td>
+            <td>89<span class="std"> ±1.2</span></td><td class="second">95<span class="std"> ±2.8</span></td>
+          </tr>
+          <tr>
+            <td>Corrective</td><td>50</td><td>100</td>
+            <td class="best">72<span class="std"> ±2.4</span></td><td class="best">92<span class="std"> ±3.0</span></td>
+            <td class="best">36<span class="std"> ±3.7</span></td><td class="second">65<span class="std"> ±1.6</span></td>
+            <td class="best">97<span class="std"> ±0.5</span></td><td class="best">99<span class="std"> ±0.9</span></td>
+            <td class="second">86<span class="std"> ±0.6</span></td><td class="second">92<span class="std"> ±1.7</span></td>
+            <td>97<span class="std"> ±1.6</span></td><td class="best">100<span class="std"> ±0.0</span></td>
+            <td class="second">92<span class="std"> ±0.9</span></td><td class="second">95<span class="std"> ±0.0</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="legend"><b>Bold</b> = best, <u>underline</u> = second best. Task / Subtask success rate (%)
+      over 256 parallel environments and three seeds. Subtask SR = grasp success (Pan, Drawer) or partial
+      rotation (Valve). <b>BC</b> uses offline data only; <b>HIL</b> uses unguided full-rollout inspection;
+      <b>Corrective</b> uses VR-DAgger uncertainty-guided active relabeling.</p>
+
+    <div class="media-row cols-2" style="margin-top:30px;">
+      <figure class="figure-card">
+        <img src="assets/img/results_bar.png" alt="Task and subtask success rates at 150 total demonstrations across Default and Hard difficulties for BC, Corrective, and HIL." />
+        <figcaption><b>Success rates at 150 total demos.</b> BC, Corrective, and HIL share the same initial
+          50 offline demos; 100 additional demos are collected offline (BC), via full human interventions
+          (HIL), or via active relabeling (Corrective). Dark/light bars show task/subtask success.</figcaption>
+      </figure>
+      <figure class="figure-card">
+        <img src="assets/img/timing.png" alt="Mean data collection time per sample across Pan, Drawer, and Valve for Corrective, HIL, and BC." />
+        <figcaption><b>Average data-collection effort.</b> Mean collection time per sample (s/trajectory).
+          Corrective consistently needs less time than HIL across all tasks — operators review only short
+          uncertainty-selected snippets rather than full rollouts — while staying comparable to BC.</figcaption>
+      </figure>
+    </div>
+
+    <figure class="figure-card" style="margin-top:18px;">
+      <img src="assets/img/rollout.jpg" alt="Example rollout for the Pan task: global simulator frames on top with corresponding wrist-mounted frames below." />
+      <figcaption><b>Example rollout (Pan).</b> Global simulator frames (top) with corresponding
+        wrist-mounted frames (bottom) as the robot approaches, grasps, and manipulates the object. The
+        policy integrates the third-person view for spatial context and the ego-centric wrist views for
+        fine-grained manipulation.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================ BIBTEX ============================ -->
+<section id="bibtex" class="section">
+  <div class="wrap">
+    <p class="eyebrow">Citation</p>
+    <h2 class="section-title">BibTeX</h2>
+    <p class="section-lead">If you find this work useful, please consider citing it. Publication details
+      will be finalized upon acceptance.</p>
+    <div class="bibtex-box">
+      <button class="copy-btn" type="button">Copy</button>
+<pre class="bibtex">@inproceedings{zurbrugg2026vrdagger,
+  title     = {VR-DAgger: Immersive VR for Dexterous Data Collection and
+               Uncertainty-Guided On-Policy Correction},
+  author    = {Zurbr{\"u}gg, Ren{\'e} and Portela, Tifanny and Bhardwaj, Arjun and
+               Elanjimattathil Vijayan, Aravind and Wilder-Smith, Maximilian and
+               Hutter, Marco},
+  booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  year      = {2026}
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FOOTER ============================ -->
+<footer>
+  <div class="wrap">
+    <p><b>VR-DAgger</b> &mdash; Robotics Systems Lab, ETH Zürich.</p>
+  </div>
+</footer>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>
